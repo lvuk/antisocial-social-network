@@ -27,7 +27,7 @@ const getAllUsers = (req, res) => {
       return res.status(400).json({ error: err });
     }
     res.json({ users: users });
-  }).select('name email updated created');
+  }).select('username email updated created');
 };
 
 const getUser = (req, res) => {

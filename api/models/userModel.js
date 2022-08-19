@@ -5,7 +5,7 @@ const { ObjectId } = mongoose.Schema;
 const Post = require('./postModel');
 
 const userSchema = new mongoose.Schema({
-  name: {
+  username: {
     type: String,
     trim: true,
     required: true,

@@ -36,8 +36,8 @@ const signin = (req, res) => {
         //persists token in cookie
         res.cookie('t', token, { expire: new Date() + 9999 });
 
-        const { _id, name, email } = user;
-        return res.json({ token, user: { _id, email, name } });
+        const { _id, username, email } = user;
+        return res.json({ token, user: { _id, email, username } });
       }
     }
   });

@@ -7,7 +7,7 @@ exports.postById = (req, res, next, id) => {
   Post.findById(id, (err, post) => {
     if (err || !post) return res.status(400).json({ error: err });
 
-    post.populate('creator', '_id name');
+    post.populate('creator', '_id username');
 
     req.post = post;
     next();
@@ -32,7 +32,7 @@ exports.isCreator = (req, res, next) => {
 
 exports.getAllPosts = (req, res) => {
   const posts = Post.find()
-    .populate('creator', '_id name')
+    .populate('creator', '_id username')
     .then((posts) => {
       res.json({ posts: posts });
     })
@@ -81,7 +81,7 @@ exports.updatePost = (req, res, next) => {
 
 exports.getPostsByUser = (req, res) => {
   Post.find({ creator: req.profile._id })
-    .populate('creator', '_id name')
+    .populate('creator', '_id username')
     .sort('_created')
     .exec((err, posts) => {
       if (err) return res.status(400).json({ error: err });
