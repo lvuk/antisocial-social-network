@@ -25,11 +25,6 @@ class Profile extends Component {
     });
   };
 
-  // componentDidUpdate(props) {
-  //   const userId = props.match.params.userId;
-  //   this.init(userId);
-  // }
-
   componentDidMount() {
     const userId = this.props.match.params.userId;
     this.init(userId);
