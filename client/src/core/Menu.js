@@ -60,7 +60,7 @@ const Menu = ({ history }) => (
                 to={`/user/${isAuthenticated().user._id}`}
                 style={isActive(history, `/user/${isAuthenticated().user._id}`)}
               >
-                {`${isAuthenticated().user.username} profile`}
+                profile
               </Link>
             </p>
             <button

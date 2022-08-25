@@ -29,6 +29,7 @@ class Signin extends Component {
     };
     //send to backend
     signin(user).then((data) => {
+      console.log(data);
       if (data.error) {
         this.setState({ error: data.error, loading: false });
       } else {

@@ -1,16 +1,21 @@
 const User = require('../models/userModel');
 const _ = require('lodash');
+const formidable = require('formidable');
+const fs = require('fs');
 
 const userById = (req, res, next, id) => {
-  User.findById(id).exec((err, user) => {
-    if (err || !user) {
-      return res.status(400).json({ error: 'User not found' });
-    }
+  User.findById(id)
+    .populate('following', '_id username')
+    .populate('followers', '_id username')
+    .exec((err, user) => {
+      if (err || !user) {
+        return res.status(400).json({ error: 'User not found' });
+      }
 
-    //adds profile object to req
-    req.profile = user;
-    next();
-  });
+      //adds profile object to req
+      req.profile = user;
+      next();
+    });
 };
 
 const hasAuthorization = (req, res, next) => {
@@ -36,20 +41,54 @@ const getUser = (req, res) => {
   res.json(req.profile);
 };
 
-const updateUser = (req, res, next) => {
-  let user = req.profile;
-  user = _.extend(user, req.body); //mutate the source object
-  user.updated = Date.now();
-  user.save((err) => {
-    if (err)
-      return res
-        .status(400)
-        .json({ error: 'You are not authorized to perform this action' });
+// const updateUser = (req, res, next) => {
+//   let user = req.profile;
+//   user = _.extend(user, req.body); //mutate the source object
+//   user.updated = Date.now();
+//   user.save((err) => {
+//     if (err)
+//       return res
+//         .status(400)
+//         .json({ error: 'You are not authorized to perform this action' });
 
-    user.hashed_password = undefined;
-    user.salt = undefined;
-    res.json({ user: user });
+//     user.hashed_password = undefined;
+//     user.salt = undefined;
+//     res.json({ user: user });
+//   });
+// };
+
+const updateUser = (req, res, next) => {
+  let form = new formidable.IncomingForm();
+  form.keepExtensions = true;
+  form.parse(req, (err, fields, files) => {
+    if (err)
+      return res.status(400).json({ error: 'Photo could not be uploaded' });
+
+    let user = req.profile;
+    user = _.extend(user, fields);
+    user.updated = Date.now();
+
+    if (files.photo) {
+      user.photo.data = fs.readFileSync(files.photo.filepath);
+      user.photo.contentType = files.photo.type;
+    }
+    user.save((err, result) => {
+      if (err) {
+        return res.status(400).json({ error: err });
+      }
+      user.hashed_password = undefined;
+      user.salt = undefined;
+      res.json(user);
+    });
   });
+};
+
+const userPhoto = (req, res, next) => {
+  if (req.profile.photo.data) {
+    res.set('Content-Type', req.profile.photo.contentType);
+    return res.send(req.profile.photo.data);
+  }
+  next();
 };
 
 const deleteUser = (req, res) => {
@@ -60,6 +99,97 @@ const deleteUser = (req, res) => {
   });
 };
 
+//follow unfollow
+const addFollowing = (req, res, next) => {
+  User.findByIdAndUpdate(
+    req.body.userId,
+    {
+      $push: { following: req.body.followId },
+    },
+    (err, result) => {
+      if (err) {
+        return res.status(400).json({ error: err });
+      }
+      next();
+    }
+  );
+};
+
+const addFollower = (req, res) => {
+  User.findByIdAndUpdate(
+    req.body.followId,
+    {
+      $push: { followers: req.body.userId },
+    },
+    {
+      new: true,
+    },
+    (err, result) => {
+      if (err) {
+        return res.status(400).json({ error: err });
+      }
+      next();
+    }
+  )
+    .populate('following', '_id username')
+    .populate('followers', '_id username')
+    .exec((err, result) => {
+      if (err) {
+        return res.status(400).json({
+          error: err,
+        });
+      }
+      result.hashed_password = undefined;
+      result.salt = undefined;
+      res.json(result);
+    });
+};
+
+const removeFollowing = (req, res, next) => {
+  User.findByIdAndUpdate(
+    req.body.userId,
+    {
+      $pull: { following: req.body.followId },
+    },
+    (err, result) => {
+      if (err) {
+        return res.status(400).json({ error: err });
+      }
+      next();
+    }
+  );
+};
+
+const removeFollower = (req, res) => {
+  User.findByIdAndUpdate(
+    req.body.followId,
+    {
+      $pull: { followers: req.body.userId },
+    },
+    {
+      new: true,
+    },
+    (err, result) => {
+      if (err) {
+        return res.status(400).json({ error: err });
+      }
+      next();
+    }
+  )
+    .populate('following', '_id username')
+    .populate('followers', '_id username')
+    .exec((err, result) => {
+      if (err) {
+        return res.status(400).json({
+          error: err,
+        });
+      }
+      result.hashed_password = undefined;
+      result.salt = undefined;
+      res.json(result);
+    });
+};
+
 module.exports = {
   userById,
   hasAuthorization,
@@ -67,4 +197,9 @@ module.exports = {
   getUser,
   updateUser,
   deleteUser,
+  userPhoto,
+  addFollowing,
+  addFollower,
+  removeFollower,
+  removeFollowing,
 };
