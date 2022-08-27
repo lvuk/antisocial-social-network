@@ -29,6 +29,15 @@ const Menu = ({ history }) => (
           Users
         </Link>
       </li>
+      <li className='nav-item'>
+        <Link
+          to='/findpeople'
+          className='nav-link'
+          style={isActive(history, '/findpeople')}
+        >
+          Explore
+        </Link>
+      </li>
       {!isAuthenticated() && (
         <div className='d-flex ms-auto'>
           <li className='nav-item'>

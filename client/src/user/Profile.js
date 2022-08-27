@@ -77,20 +77,29 @@ class Profile extends Component {
       <div className='container'>
         <h2 className='mt-5 mb-5'>Profile</h2>
         <div className='row'>
-          <div className='col-md-6'>
+          <div className='col-md-4'>
             <img
               src={photoUrl}
               onError={(i) => (i.target.src = `${DefaultPicture}`)}
               alt={user.username}
-              style={{ height: '200px', width: 'auto' }}
+              style={{
+                height: '200px',
+                width: '200px',
+                borderRadius: '50%',
+                marginLeft: 'auto',
+                marginRight: 'auto',
+              }}
               className='img-thumbnail'
             />
           </div>
-          <div className='col-md-6'>
+          <div className='col-md-8'>
             <div className='lead mt-2'>
-              <p>Hello, {user.username}</p>
-              <p>Email {user.email}</p>
-              <p>{`Joined ${new Date(user.created).toDateString()}`}</p>
+              <p className='fw-bolder'>{user.username}</p>
+              <p style={{ fontSize: '1rem' }}>Email: {user.email}</p>
+              <p
+                style={{ fontSize: '1rem' }}
+                className='fst-italic'
+              >{`Joined ${new Date(user.created).toDateString()}`}</p>
             </div>
             {isAuthenticated().user &&
             isAuthenticated().user._id === user._id ? (

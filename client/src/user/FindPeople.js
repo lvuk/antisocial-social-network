@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { list } from './apiUser';
+import { findPeople } from './apiUser';
 import DefaultPicture from '../images/avatar.png';
 import { Link } from 'react-router-dom';
+import { isAuthenticated } from '../auth';
 
-class Users extends Component {
+class FindPeople extends Component {
   constructor() {
     super();
     this.state = {
@@ -12,7 +13,9 @@ class Users extends Component {
   }
 
   componentDidMount = () => {
-    list().then((data) => {
+    const userId = isAuthenticated().user._id;
+    const token = isAuthenticated().token;
+    findPeople(userId, token).then((data) => {
       if (data.error) {
         console.log(data.error);
       } else {
@@ -43,7 +46,11 @@ class Users extends Component {
               <div className='card-body'>
                 <h5 className='card-title'>{user.username}</h5>
                 <p className='card-text'>{user.email}</p>
-                <Link to={`/user/${user._id}`} className='btn btn-warning'>
+                <Link
+                  to={`/user/${user._id}`}
+                  className='btn btn-warning'
+                  style={{ marginLeft: 'auto', marginRight: 'auto' }}
+                >
                   View Profile
                 </Link>
               </div>
@@ -66,4 +73,4 @@ class Users extends Component {
   }
 }
 
-export default Users;
+export default FindPeople;

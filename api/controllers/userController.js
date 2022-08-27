@@ -162,6 +162,17 @@ const removeFollower = (req, res) => {
     });
 };
 
+const findPeople = (req, res) => {
+  let following = req.profile.following;
+  following.push(req.profile._id);
+  User.find({ _id: { $nin: following } }, (err, users) => {
+    if (err) {
+      return res.status(400).json({ error: err });
+    }
+    res.json(users);
+  }).select('username');
+};
+
 module.exports = {
   userById,
   hasAuthorization,
@@ -174,4 +185,5 @@ module.exports = {
   addFollowing,
   removeFollower,
   removeFollowing,
+  findPeople,
 };
