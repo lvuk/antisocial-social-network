@@ -1,3 +1,5 @@
+const Post = require('../models/postModel');
+
 exports.createPostValidator = (req, res, next) => {
   //title
   req.check('title', 'Write a title').notEmpty();
@@ -24,4 +26,25 @@ exports.createPostValidator = (req, res, next) => {
 
   //next middlewear
   next();
+};
+
+exports.validateTimeForPost = (req, res, next) => {
+  console.log('jgsafhgjkafhgjksagjkfaghjk');
+  //get last post
+  Post.findOne(
+    {
+      created: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+    },
+    (err, post) => {
+      if (err) {
+        return res.status(400).json({ error: err });
+      }
+      if (post === null) next();
+      else {
+        return res
+          .status(400)
+          .json({ error: 'There must be 24 hours gap between two posts' });
+      }
+    }
+  );
 };

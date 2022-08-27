@@ -3,6 +3,7 @@ import { Redirect } from 'react-router-dom';
 import { isAuthenticated } from '../auth';
 import { read, update, updateUser } from './apiUser';
 import DefaultPicture from '../images/avatar.png';
+import DeleteUser from './DeleteUser';
 
 class EditProfile extends Component {
   constructor() {
@@ -100,7 +101,7 @@ class EditProfile extends Component {
     }
   };
 
-  signupForm = (username, email, password, about) => {
+  signupForm = (username, email, password, about, id) => {
     return (
       <form action='' method='post'>
         <div className='form-group'>
@@ -150,12 +151,14 @@ class EditProfile extends Component {
             value={password}
           />
         </div>
-        <button
-          onClick={this.clickUpdate}
-          className='btn btn-raised btn-outline-warning btn-rounded mt-3'
-        >
-          Update
-        </button>
+        <div className='d-inline-block'>
+          <button
+            onClick={this.clickUpdate}
+            className='btn btn-raised btn-outline-success btn-rounded mt-3 me-5'
+          >
+            Update
+          </button>
+        </div>
       </form>
     );
   };
@@ -205,7 +208,11 @@ class EditProfile extends Component {
         >
           {error}
         </div>
-        {this.signupForm(username, email, password, about)}
+
+        {this.signupForm(username, email, password, about, id)}
+        <div className='mt-3'>
+          <DeleteUser userId={id} />
+        </div>
       </div>
     );
   }

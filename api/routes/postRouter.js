@@ -8,7 +8,10 @@ const {
   deletePost,
   updatePost,
 } = require('../controllers/postController');
-const { createPostValidator } = require('../validators/postValidator');
+const {
+  createPostValidator,
+  validateTimeForPost,
+} = require('../validators/postValidator');
 const { requireSignin } = require('../controllers/authController');
 const { userById } = require('../controllers/userController');
 
@@ -18,6 +21,7 @@ router.get('/posts', requireSignin, getAllPosts);
 router.post(
   '/post/new/:userId',
   requireSignin,
+  validateTimeForPost,
   createPost,
   createPostValidator
 );

@@ -82,19 +82,21 @@ class Profile extends Component {
               src={photoUrl}
               onError={(i) => (i.target.src = `${DefaultPicture}`)}
               alt={user.username}
+              className='img-thumbnail'
               style={{
                 height: '200px',
                 width: '200px',
                 borderRadius: '50%',
-                marginLeft: 'auto',
-                marginRight: 'auto',
+                marginLeft: '10%',
               }}
-              className='img-thumbnail'
             />
           </div>
-          <div className='col-md-8'>
+          <div className='col-md-4'>
             <div className='lead mt-2'>
               <p className='fw-bolder'>{user.username}</p>
+              <p className='fst-italic' style={{ fontSize: '1rem' }}>
+                {user.about}
+              </p>
               <p style={{ fontSize: '1rem' }}>Email: {user.email}</p>
               <p
                 style={{ fontSize: '1rem' }}
@@ -105,12 +107,11 @@ class Profile extends Component {
             isAuthenticated().user._id === user._id ? (
               <div className='d-inline-block'>
                 <Link
-                  className='btn btn-raised btn-outline-success me-5'
+                  className='btn btn-raised btn-outline-success me-1'
                   to={`/user/edit/${user._id}`}
                 >
                   Edit Profile
                 </Link>
-                <DeleteUser userId={user._id} />
               </div>
             ) : (
               <FollowProfileButton
@@ -119,16 +120,16 @@ class Profile extends Component {
               />
             )}
           </div>
-        </div>
-        <div className='row'>
-          <div className='col md-12 mt-5 mb-5'>
-            <hr />
-            <p className='lead'>{user.about}</p>
-            <hr />
+          <div className='col-md-4 mt-5'>
             <ProfileTabs
               followers={user.followers}
               following={user.following}
             />
+          </div>
+        </div>
+        <div className='row'>
+          <div className='col md-12 mt-5 mb-5'>
+            <hr />
           </div>
         </div>
       </div>
