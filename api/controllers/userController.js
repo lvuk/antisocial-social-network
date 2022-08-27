@@ -103,9 +103,7 @@ const deleteUser = (req, res) => {
 const addFollowing = (req, res, next) => {
   User.findByIdAndUpdate(
     req.body.userId,
-    {
-      $push: { following: req.body.followId },
-    },
+    { $push: { following: req.body.followId } },
     (err, result) => {
       if (err) {
         return res.status(400).json({ error: err });
@@ -118,26 +116,14 @@ const addFollowing = (req, res, next) => {
 const addFollower = (req, res) => {
   User.findByIdAndUpdate(
     req.body.followId,
-    {
-      $push: { followers: req.body.userId },
-    },
-    {
-      new: true,
-    },
-    (err, result) => {
-      if (err) {
-        return res.status(400).json({ error: err });
-      }
-      next();
-    }
+    { $push: { followers: req.body.userId } },
+    { new: true }
   )
     .populate('following', '_id username')
     .populate('followers', '_id username')
     .exec((err, result) => {
       if (err) {
-        return res.status(400).json({
-          error: err,
-        });
+        return res.sstatus(400).json({ error: err });
       }
       result.hashed_password = undefined;
       result.salt = undefined;
@@ -148,9 +134,7 @@ const addFollower = (req, res) => {
 const removeFollowing = (req, res, next) => {
   User.findByIdAndUpdate(
     req.body.userId,
-    {
-      $pull: { following: req.body.followId },
-    },
+    { $pull: { following: req.body.unfollowId } },
     (err, result) => {
       if (err) {
         return res.status(400).json({ error: err });
@@ -162,27 +146,15 @@ const removeFollowing = (req, res, next) => {
 
 const removeFollower = (req, res) => {
   User.findByIdAndUpdate(
-    req.body.followId,
-    {
-      $pull: { followers: req.body.userId },
-    },
-    {
-      new: true,
-    },
-    (err, result) => {
-      if (err) {
-        return res.status(400).json({ error: err });
-      }
-      next();
-    }
+    req.body.unfollowId,
+    { $pull: { followers: req.body.userId } },
+    { new: true }
   )
     .populate('following', '_id username')
     .populate('followers', '_id username')
     .exec((err, result) => {
       if (err) {
-        return res.status(400).json({
-          error: err,
-        });
+        return res.sstatus(400).json({ error: err });
       }
       result.hashed_password = undefined;
       result.salt = undefined;
@@ -198,8 +170,8 @@ module.exports = {
   updateUser,
   deleteUser,
   userPhoto,
-  addFollowing,
   addFollower,
+  addFollowing,
   removeFollower,
   removeFollowing,
 };

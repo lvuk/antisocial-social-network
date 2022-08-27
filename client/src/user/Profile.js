@@ -4,15 +4,42 @@ import { isAuthenticated } from '../auth';
 import { read } from './apiUser';
 import DefaultPicture from '../images/avatar.png';
 import DeleteUser from './DeleteUser';
+import FollowProfileButton from './FollowProfileButton';
+import ProfileTabs from './ProfileTabs';
 
 class Profile extends Component {
   constructor() {
     super();
     this.state = {
-      user: '',
+      user: { following: [], followers: [] },
       redirectToSignin: false,
+      following: false,
+      error: '',
     };
   }
+
+  // check follow
+  checkFollow = (user) => {
+    const jwt = isAuthenticated();
+    const match = user.followers.find((follower) => {
+      // one id has many other ids (followers) and vice versa
+      return follower._id === jwt.user._id;
+    });
+    return match;
+  };
+
+  clickFollowButton = (callApi) => {
+    const userId = isAuthenticated().user._id;
+    const token = isAuthenticated().token;
+
+    callApi(userId, token, this.state.user._id).then((data) => {
+      if (data.error) {
+        this.setState({ error: data.error });
+      } else {
+        this.setState({ user: data, following: !this.state.following });
+      }
+    });
+  };
 
   init = (userId) => {
     const token = isAuthenticated().token;
@@ -20,11 +47,11 @@ class Profile extends Component {
       if (data.error) {
         this.setState({ redirectToSignin: true });
       } else {
-        this.setState({ user: data });
+        let following = this.checkFollow(data);
+        this.setState({ user: data, following });
       }
     });
   };
-
   componentDidMount() {
     const userId = this.props.match.params.userId;
     this.init(userId);
@@ -65,8 +92,9 @@ class Profile extends Component {
               <p>Email {user.email}</p>
               <p>{`Joined ${new Date(user.created).toDateString()}`}</p>
             </div>
-            {isAuthenticated().user && isAuthenticated().user._id === user._id && (
-              <div className='d-inline-block mt-5'>
+            {isAuthenticated().user &&
+            isAuthenticated().user._id === user._id ? (
+              <div className='d-inline-block'>
                 <Link
                   className='btn btn-raised btn-outline-success me-5'
                   to={`/user/edit/${user._id}`}
@@ -75,6 +103,11 @@ class Profile extends Component {
                 </Link>
                 <DeleteUser userId={user._id} />
               </div>
+            ) : (
+              <FollowProfileButton
+                following={this.state.following}
+                onButtonClick={this.clickFollowButton}
+              />
             )}
           </div>
         </div>
@@ -83,6 +116,10 @@ class Profile extends Component {
             <hr />
             <p className='lead'>{user.about}</p>
             <hr />
+            <ProfileTabs
+              followers={user.followers}
+              following={user.following}
+            />
           </div>
         </div>
       </div>
