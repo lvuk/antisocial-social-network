@@ -21,7 +21,7 @@ router.get('/posts', requireSignin, getAllPosts);
 router.post(
   '/post/new/:userId',
   requireSignin,
-  validateTimeForPost,
+  // validateTimeForPost,
   createPost,
   createPostValidator
 );

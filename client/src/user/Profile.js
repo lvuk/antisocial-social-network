@@ -3,7 +3,6 @@ import { Redirect, Link } from 'react-router-dom';
 import { isAuthenticated } from '../auth';
 import { read } from './apiUser';
 import DefaultPicture from '../images/avatar.png';
-import DeleteUser from './DeleteUser';
 import FollowProfileButton from './FollowProfileButton';
 import ProfileTabs from './ProfileTabs';
 

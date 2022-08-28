@@ -51,7 +51,7 @@ exports.createPost = (req, res, next) => {
     req.profile.salt = undefined;
     post.creator = req.profile;
     if (files.photo) {
-      post.photo.data = fs.readFileSync(files.photo.path);
+      post.photo.data = fs.readFileSync(files.photo.filepath);
       post.photo.contentType = files.photo.type;
     }
     post.save((err, result) => {

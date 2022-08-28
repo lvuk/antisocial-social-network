@@ -1,17 +1,10 @@
 const Post = require('../models/postModel');
 
 exports.createPostValidator = (req, res, next) => {
-  //title
-  req.check('title', 'Write a title').notEmpty();
-  req.check('title', 'Title must be between 4 to 150').isLength({
-    min: 4,
-    max: 150,
-  });
-
-  //body
-  req.check('body', 'Write a body').notEmpty();
-  req.check('body', 'Body must be between 4 to 365').isLength({
-    min: 4,
+  //post
+  req.check('post', 'Post cannot be empty').notEmpty();
+  req.check('post', 'Post must be between 1 to 365').isLength({
+    min: 1,
     max: 365,
   });
 
@@ -29,7 +22,6 @@ exports.createPostValidator = (req, res, next) => {
 };
 
 exports.validateTimeForPost = (req, res, next) => {
-  console.log('jgsafhgjkafhgjksagjkfaghjk');
   //get last post
   Post.findOne(
     {

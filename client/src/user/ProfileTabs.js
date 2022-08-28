@@ -9,9 +9,9 @@ class ProfileTabs extends Component {
       <div>
         <div className='row'>
           <div className='col-md-6'>
-            <div class='dropdown'>
+            <div className='dropdown'>
               <button
-                class='btn btn-outline-dark dropdown-toggle'
+                className='btn btn-outline-dark dropdown-toggle'
                 type='button'
                 id='dropdownMenuButton'
                 data-mdb-toggle='dropdown'
@@ -19,7 +19,10 @@ class ProfileTabs extends Component {
               >
                 Followers
               </button>
-              <ul class='dropdown-menu' aria-labelledby='dropdownMenuButton'>
+              <ul
+                className='dropdown-menu'
+                aria-labelledby='dropdownMenuButton'
+              >
                 {followers.map((person, i) => (
                   <li key={i} className='dropdown-item'>
                     <div>
@@ -57,9 +60,9 @@ class ProfileTabs extends Component {
             </p>
           </div>
           <div className='col-md-6'>
-            <div class='ms-3 dropdown'>
+            <div className='ms-3 dropdown'>
               <button
-                class='btn btn-outline-dark dropdown-toggle'
+                className='btn btn-outline-dark dropdown-toggle'
                 type='button'
                 id='dropdownMenuButton'
                 data-mdb-toggle='dropdown'
@@ -67,7 +70,10 @@ class ProfileTabs extends Component {
               >
                 Following
               </button>
-              <ul class='dropdown-menu' aria-labelledby='dropdownMenuButton'>
+              <ul
+                className='dropdown-menu'
+                aria-labelledby='dropdownMenuButton'
+              >
                 {following.map((person, i) => (
                   <li key={i} className='dropdown-item'>
                     <Link to={`/user/${person._id}`}>
