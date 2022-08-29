@@ -4,14 +4,16 @@ const fs = require('fs');
 const _ = require('lodash');
 
 exports.postById = (req, res, next, id) => {
-  Post.findById(id, (err, post) => {
-    if (err || !post) return res.status(400).json({ error: err });
-
-    post.populate('creator', '_id username');
-
-    req.post = post;
-    next();
-  });
+  Post.findById(id)
+    .populate('creator', '_id username')
+    .exec((err, post) => {
+      if (err || !post)
+        return res.status('400').json({
+          error: 'Post not found',
+        });
+      req.post = post;
+      next();
+    });
 };
 
 exports.isCreator = (req, res, next) => {
@@ -33,8 +35,10 @@ exports.isCreator = (req, res, next) => {
 exports.getAllPosts = (req, res) => {
   const posts = Post.find()
     .populate('creator', '_id username')
+    .select('_id post created photo')
+    .sort({ created: -1 })
     .then((posts) => {
-      res.json({ posts: posts });
+      res.json(posts);
     })
     .catch((err) => console.log(err));
 };
@@ -54,8 +58,16 @@ exports.createPost = (req, res, next) => {
       post.photo.data = fs.readFileSync(files.photo.filepath);
       post.photo.contentType = files.photo.type;
     }
+    if (!post.post) {
+      return res.status(400).json({ error: "Post can't be empty" });
+    } else if (post.post.length < 4 || post.post.length > 365) {
+      return res.status(400).json({
+        error: 'Post must be between 4 and 365 characters long',
+      });
+    }
     post.save((err, result) => {
       if (err) return res.status(400).json({ error: err });
+      console.log(result);
       res.json(result);
     });
   });
@@ -87,4 +99,13 @@ exports.getPostsByUser = (req, res) => {
       if (err) return res.status(400).json({ error: err });
       res.json(posts);
     });
+};
+
+exports.postPhoto = (req, res, next) => {
+  res.set('Content-Type', req.post.photo.contentType);
+  return res.send(req.post.photo.data);
+};
+
+exports.getSinglePost = (req, res) => {
+  return res.json(req.post);
 };

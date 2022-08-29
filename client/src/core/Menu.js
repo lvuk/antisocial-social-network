@@ -3,7 +3,8 @@ import { Link, withRouter } from 'react-router-dom';
 import { isAuthenticated, signout } from '../auth';
 
 const isActive = (history, path) => {
-  if (history.location.pathname === path) return { color: '#FFAB40' };
+  if (history.location.pathname === path)
+    return { backgroundColor: '#FFFF', color: '#121212' };
   else return { color: '#757575' };
 };
 
@@ -14,7 +15,10 @@ const Menu = ({ history }) => (
   //     <Link to='/signup'>Sign up</Link>
   //   </div>
   <div>
-    <ul className='nav nav-tabs bg-light'>
+    <ul
+      className='nav nav-tabs'
+      style={{ backgroundColor: '#DDDDDD', color: '#FFFF' }}
+    >
       <li className='nav-item'>
         <Link to='/' className='nav-link' style={isActive(history, '/')}>
           Home
@@ -64,14 +68,14 @@ const Menu = ({ history }) => (
       {isAuthenticated() && (
         <div className=' ms-auto'>
           <li className='nav-item d-flex'>
-            <p className='nav-link'>
-              <Link
-                to={`/user/${isAuthenticated().user._id}`}
-                style={isActive(history, `/user/${isAuthenticated().user._id}`)}
-              >
-                profile
-              </Link>
-            </p>
+            <Link
+              to={`/user/${isAuthenticated().user._id}`}
+              style={isActive(history, `/user/${isAuthenticated().user._id}`)}
+              className='nav-link'
+            >
+              profile
+            </Link>
+
             <button
               className='nav-link'
               style={isActive(history, '/signout')}

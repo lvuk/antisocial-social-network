@@ -48,7 +48,7 @@ class FindPeople extends Component {
                 <p className='card-text'>{user.email}</p>
                 <Link
                   to={`/user/${user._id}`}
-                  className='btn btn-warning'
+                  className='btn btn-primary'
                   style={{ marginLeft: 'auto', marginRight: 'auto' }}
                 >
                   View Profile

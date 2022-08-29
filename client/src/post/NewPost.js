@@ -56,7 +56,8 @@ class NewPost extends Component {
       const token = isAuthenticated().token;
       //send to backend
       create(userId, token, this.postData).then((data) => {
-        if (data.error) this.setState({ error: data.error });
+        if (data.error)
+          this.setState({ error: data.error, loading: false, post: '' });
         else {
           this.setState({
             loading: false,
@@ -78,7 +79,7 @@ class NewPost extends Component {
             type='text'
             className='form-control'
             value={post}
-            style={{ resize: 'none' }}
+            style={{ resize: 'none', whiteSpace: 'pre' }}
           />
         </div>
 
@@ -154,6 +155,7 @@ class NewPost extends Component {
 
   render() {
     const { post, error, loading, isPosted } = this.state;
+    console.log(error);
 
     return (
       <div className='container'>
@@ -164,12 +166,20 @@ class NewPost extends Component {
         ) : (
           ''
         )}
-        <div
-          className='alert alert-danger mt-3'
-          style={{ display: error ? '' : 'none' }}
-        >
-          {error}
-        </div>
+        {error ? (
+          <div className='alert alert-danger alert-dismissible fade show mt-3'>
+            {error}{' '}
+            <button
+              type='button'
+              className='btn-close'
+              data-mdb-dismiss='alert'
+              aria-label='Close'
+            ></button>
+          </div>
+        ) : (
+          ''
+        )}
+
         {isPosted ? (
           <div className='alert alert-success mt-3  alert-dismissible fade show '>
             Successfully posted!{' '}
