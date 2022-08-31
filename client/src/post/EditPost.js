@@ -3,6 +3,9 @@ import { Redirect } from 'react-router-dom';
 import { isAuthenticated } from '../auth';
 import { singlePost } from './apiPost';
 import { update } from './apiPost';
+import DeletePost from './DeletePost';
+import DefaultPicture from '../images/avatar.png';
+import { Link } from 'react-router-dom';
 
 class EditPost extends Component {
   constructor() {
@@ -15,6 +18,7 @@ class EditPost extends Component {
       fileSize: 0,
       loading: false,
       img: false,
+      created: '',
     };
   }
 
@@ -27,6 +31,7 @@ class EditPost extends Component {
           id: data._id,
           post: data.post,
           error: '',
+          created: data.created,
         });
       }
     });
@@ -100,15 +105,17 @@ class EditPost extends Component {
   updateForm = (post) => {
     return (
       <div className='row'>
-        <div className='col-sm-9 mt-5 mx-auto'>
-          <form action='' method='post'>
+        <div className='col-lg-4 col-md-10 mt-5 mx-auto'>
+          <form>
             <div className='form-group'>
               <textarea
                 onChange={this.handleChange('post')}
                 type='text'
                 className='form-control'
                 value={post}
-                style={{ resize: 'none', whiteSpace: 'pre' }}
+                style={{
+                  whiteSpace: 'pre',
+                }}
               />
             </div>
             <br />
@@ -130,6 +137,9 @@ class EditPost extends Component {
               >
                 Update
               </button>
+              <div className='d-inline ms-3'>
+                <DeletePost postId={this.state.id} />
+              </div>
             </div>
           </form>
         </div>
@@ -139,6 +149,8 @@ class EditPost extends Component {
 
   render() {
     const { post, redirectToProfile, id, img, error } = this.state;
+    const posterId = isAuthenticated().user._id;
+    const posterUsername = isAuthenticated().user.username;
 
     if (redirectToProfile) {
       return <Redirect to={`/user/${isAuthenticated().user._id}`} />;
@@ -155,14 +167,48 @@ class EditPost extends Component {
               >
                 {error}
               </div>
-              {img ? (
+              <div className='d-inline'>
                 <img
-                  src={`${
-                    process.env.REACT_APP_API_URL
-                  }/post/photo/${id}?${new Date().getTime()}`}
-                  alt='post'
-                  className='img-fluid mb-3 text-center'
+                  style={{
+                    borderRadius: '50%',
+                    border: '1px solid black',
+                  }}
+                  className='float-left me-2'
+                  height='40px'
+                  width='40px'
+                  onError={(i) => (i.target.src = `${DefaultPicture}`)}
+                  src={`${process.env.REACT_APP_API_URL}/user/photo/${posterId}`}
+                  alt={posterUsername}
                 />
+                <Link
+                  to={`/user/${posterId}`}
+                  className='lead text-body d-inline'
+                  style={{ display: 'inline', fontSize: '1.2rem' }}
+                >
+                  {posterUsername}{' '}
+                  <p
+                    style={{
+                      fontSize: '0.8rem',
+                      marginLeft: '50px',
+                      marginTop: '-10px',
+                    }}
+                  >
+                    {new Date(this.state.created).toDateString()}
+                  </p>
+                </Link>
+              </div>
+              <hr />
+              {img ? (
+                <div className='text-center'>
+                  <img
+                    src={`${
+                      process.env.REACT_APP_API_URL
+                    }/post/photo/${id}?${new Date().getTime()}`}
+                    alt='post'
+                    className='img-fluid mt-4 text-center '
+                    style={{ display: 'inline-block' }}
+                  />
+                </div>
               ) : (
                 ''
               )}

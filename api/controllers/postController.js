@@ -35,7 +35,7 @@ exports.isCreator = (req, res, next) => {
 exports.getAllPosts = (req, res) => {
   const posts = Post.find()
     .populate('creator', '_id username')
-    .select('_id post created photo')
+    .select('_id post created photo likes')
     .sort({ created: -1 })
     .then((posts) => {
       res.json(posts);
@@ -118,6 +118,7 @@ exports.updatePost = (req, res, next) => {
 exports.getPostsByUser = (req, res) => {
   Post.find({ creator: req.profile._id })
     .populate('creator', '_id username')
+    .select('_id post created photo likes')
     .sort({ created: -1 })
     .exec((err, posts) => {
       if (err) return res.status(400).json({ error: err });
@@ -132,4 +133,32 @@ exports.postPhoto = (req, res, next) => {
 
 exports.getSinglePost = (req, res) => {
   return res.json(req.post);
+};
+
+exports.like = (req, res) => {
+  Post.findByIdAndUpdate(
+    req.body.postId,
+    { $push: { likes: req.body.userId } },
+    { new: true }
+  ).exec((err, result) => {
+    if (err) {
+      return res.status(400).json({ error: err });
+    } else {
+      res.json(result);
+    }
+  });
+};
+
+exports.unlike = (req, res) => {
+  Post.findByIdAndUpdate(
+    req.body.postId,
+    { $pull: { likes: req.body.userId } },
+    { new: true }
+  ).exec((err, result) => {
+    if (err) {
+      return res.status(400).json({ error: err });
+    } else {
+      res.json(result);
+    }
+  });
 };

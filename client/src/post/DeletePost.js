@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { isAuthenticated } from '../auth';
-import { remove } from './apiUser';
-import { signout } from '../auth';
+import { remove } from './apiPost';
 import { Redirect } from 'react-router-dom';
 
 class DeletePost extends Component {
@@ -11,13 +10,12 @@ class DeletePost extends Component {
 
   deletePost = () => {
     const token = isAuthenticated().token;
-    const userId = this.props.userId;
-    remove(userId, token).then((data) => {
+    const postId = this.props.postId;
+    console.log(postId);
+    remove(postId, token).then((data) => {
       if (data.error) {
         console.log(data.error);
       } else {
-        //signout user
-        signout(() => console.log('User deleted'));
         //redirect
         this.setState({ redirect: true });
       }
@@ -25,24 +23,22 @@ class DeletePost extends Component {
   };
 
   deleteConfirm = () => {
-    let answer = window.confirm(
-      'Are you sure you want to delete your account?'
-    );
+    let answer = window.confirm('Are you sure you want to delete your post?');
     if (answer) {
-      this.deleteAccount();
+      this.deletePost();
     }
   };
 
   render() {
     if (this.state.redirect) {
-      return <Redirect to='/' />;
+      return <Redirect to={`/user/${isAuthenticated().user._id}`} />;
     }
     return (
       <button
-        className='btn btn-raised btn-danger btn-rounded'
+        className='btn btn-raised btn-danger btn-sm'
         onClick={this.deleteConfirm}
       >
-        Delete Post
+        Delete
       </button>
     );
   }

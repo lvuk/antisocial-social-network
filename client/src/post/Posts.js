@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { list } from './apiPost';
 import DefaultPicture from '../images/avatar.png';
 import { Link } from 'react-router-dom';
+import { isAuthenticated } from '../auth';
 
 class Posts extends Component {
   constructor() {
@@ -43,22 +44,41 @@ class Posts extends Component {
                   src={`${process.env.REACT_APP_API_URL}/user/photo/${posterId}`}
                   alt={posterUsername}
                 />
-                <Link
-                  to={`/user/${posterId}`}
-                  className='lead text-body'
-                  style={{ display: 'inline', fontSize: '1.2rem' }}
-                >
-                  {posterUsername}{' '}
-                  <p
-                    style={{
-                      fontSize: '0.8rem',
-                      marginLeft: '50px',
-                      marginTop: '-10px',
-                    }}
+                {isAuthenticated() ? (
+                  <Link
+                    to={`/user/${posterId}`}
+                    className='lead text-body'
+                    style={{ display: 'inline', fontSize: '1.2rem' }}
                   >
-                    {new Date(post.created).toDateString()}
-                  </p>
-                </Link>
+                    {posterUsername}{' '}
+                    <p
+                      style={{
+                        fontSize: '0.8rem',
+                        marginLeft: '50px',
+                        marginTop: '-10px',
+                      }}
+                    >
+                      {new Date(post.created).toDateString()}
+                    </p>
+                  </Link>
+                ) : (
+                  <Link
+                    to={'/signin'}
+                    className='lead text-body'
+                    style={{ display: 'inline', fontSize: '1.2rem' }}
+                  >
+                    {posterUsername}{' '}
+                    <p
+                      style={{
+                        fontSize: '0.8rem',
+                        marginLeft: '50px',
+                        marginTop: '-10px',
+                      }}
+                    >
+                      {new Date(post.created).toDateString()}
+                    </p>
+                  </Link>
+                )}
                 <hr />
                 <div className='text-center'>
                   {post.photo ? (

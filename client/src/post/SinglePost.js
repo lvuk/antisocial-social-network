@@ -1,12 +1,15 @@
 import React, { Component } from 'react';
-import { singlePost } from './apiPost';
+import { like, singlePost, unlike } from './apiPost';
 import DefaultPicture from '../images/avatar.png';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import { isAuthenticated } from '../auth';
 
 class SinglePost extends Component {
   state = {
     post: '',
+    like: false,
+    likes: 0,
+    redirectToSignin: false,
   };
 
   componentDidMount = () => {
@@ -15,7 +18,36 @@ class SinglePost extends Component {
       if (data.error) {
         console.log(data.error);
       } else {
-        this.setState({ post: data });
+        this.setState({
+          post: data,
+          likes: data.likes.length,
+          like: this.checkLike(data.likes),
+        });
+      }
+    });
+  };
+
+  checkLike = (likes) => {
+    const userId = isAuthenticated() && isAuthenticated().user._id;
+    let match = likes.indexOf(userId) !== -1;
+    return match;
+  };
+
+  likeToggle = () => {
+    if (!isAuthenticated()) {
+      this.setState({ redirectToSignin: true });
+      return false;
+    }
+    let callApi = this.state.like ? unlike : like;
+    const userId = isAuthenticated().user._id;
+    const postId = this.state.post._id;
+    const token = isAuthenticated().token;
+
+    callApi(userId, token, postId).then((data) => {
+      if (data.error) {
+        console.log(data.error);
+      } else {
+        this.setState({ like: !this.state.like, likes: data.likes.length });
       }
     });
   };
@@ -24,6 +56,12 @@ class SinglePost extends Component {
     console.log(post);
     const posterId = post.creator ? `${post.creator._id}` : '';
     const posterUsername = post.creator ? post.creator.username : 'Unknown';
+
+    const { like, likes, redirectToSignin } = this.state;
+
+    if (redirectToSignin) {
+      return <Redirect to='/signin' />;
+    }
 
     return (
       <div className='row'>
@@ -72,7 +110,15 @@ class SinglePost extends Component {
 
             <p className='card-body '>{post.post}</p>
             <hr />
-            <div className='d-inline-block'>
+            <div className='d-inline-block' onClick={this.likeToggle}>
+              {likes}{' '}
+              {!like ? (
+                <i class='fa-regular fa-heart'></i>
+              ) : (
+                <i class='fa-solid fa-heart'></i>
+              )}
+            </div>
+            <div className='d-inline-block ms-3'>
               {isAuthenticated().user &&
                 isAuthenticated().user._id === post.creator._id && (
                   <div>

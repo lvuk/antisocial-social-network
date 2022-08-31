@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+
 import { isAuthenticated } from '../auth';
 import { create } from './apiPost';
 
@@ -76,8 +77,8 @@ class NewPost extends Component {
         <div className='form-group'>
           <textarea
             onChange={this.handleChange('post')}
-            type='text'
             className='form-control'
+            maxLength='365'
             value={post}
             style={{ resize: 'none', whiteSpace: 'pre' }}
           />
@@ -182,12 +183,13 @@ class NewPost extends Component {
 
         {isPosted ? (
           <div className='alert alert-success mt-3  alert-dismissible fade show '>
-            Successfully posted!{' '}
+            Successfully posted!
             <button
               type='button'
               className='btn-close'
               data-mdb-dismiss='alert'
               aria-label='Close'
+              onClick={window.location.reload()}
             ></button>
           </div>
         ) : (

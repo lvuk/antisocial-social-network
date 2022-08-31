@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { list } from './apiUser';
 import DefaultPicture from '../images/avatar.png';
 import { Link } from 'react-router-dom';
+import { isAuthenticated } from '../auth';
 
 class Users extends Component {
   constructor() {
@@ -48,9 +49,13 @@ class Users extends Component {
                 <h5 className='card-title'>{user.username}</h5>
                 <p className='card-text'>{user.email}</p>
                 <div className='text-center'>
-                  <Link to={`/user/${user._id}`} className='btn btn-primary'>
-                    View Profile
-                  </Link>
+                  {isAuthenticated() ? (
+                    <Link to={`/user/${user._id}`} className='btn btn-primary'>
+                      View Profile
+                    </Link>
+                  ) : (
+                    ''
+                  )}
                 </div>
               </div>
             </div>
