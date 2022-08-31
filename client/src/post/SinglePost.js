@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { singlePost } from './apiPost';
 import DefaultPicture from '../images/avatar.png';
 import { Link } from 'react-router-dom';
+import { isAuthenticated } from '../auth';
 
 class SinglePost extends Component {
   state = {
@@ -21,7 +22,7 @@ class SinglePost extends Component {
 
   renderPost = (post) => {
     console.log(post);
-    const posterId = post.creator ? `/user/${post.creator._id}` : '';
+    const posterId = post.creator ? `${post.creator._id}` : '';
     const posterUsername = post.creator ? post.creator.username : 'Unknown';
 
     return (
@@ -71,6 +72,19 @@ class SinglePost extends Component {
 
             <p className='card-body '>{post.post}</p>
             <hr />
+            <div className='d-inline-block'>
+              {isAuthenticated().user &&
+                isAuthenticated().user._id === post.creator._id && (
+                  <div>
+                    <Link
+                      to={`/post/edit/${post._id}`}
+                      className='btn btn-raised btn-primary btn-sm '
+                    >
+                      Edit
+                    </Link>
+                  </div>
+                )}
+            </div>
           </div>
         </div>
       </div>

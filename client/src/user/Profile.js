@@ -5,6 +5,8 @@ import { read } from './apiUser';
 import DefaultPicture from '../images/avatar.png';
 import FollowProfileButton from './FollowProfileButton';
 import ProfileTabs from './ProfileTabs';
+import PostsByUser from '../post/PostsByUser';
+import { postsByUser } from '../post/apiPost';
 
 class Profile extends Component {
   constructor() {
@@ -14,6 +16,7 @@ class Profile extends Component {
       redirectToSignin: false,
       following: false,
       error: '',
+      posts: [],
     };
   }
 
@@ -48,9 +51,22 @@ class Profile extends Component {
       } else {
         let following = this.checkFollow(data);
         this.setState({ user: data, following });
+        this.loadPosts(data._id);
       }
     });
   };
+
+  loadPosts = (userId) => {
+    const token = isAuthenticated().token;
+    postsByUser(userId, token).then((data) => {
+      if (data.error) {
+        console.log(data.error);
+      } else {
+        this.setState({ posts: data });
+      }
+    });
+  };
+
   componentDidMount() {
     const userId = this.props.match.params.userId;
     this.init(userId);
@@ -62,7 +78,7 @@ class Profile extends Component {
   }
 
   render() {
-    const { redirectToSignin, user } = this.state;
+    const { redirectToSignin, user, posts } = this.state;
     if (redirectToSignin) {
       return <Redirect to='/signin' />;
     }
@@ -126,9 +142,11 @@ class Profile extends Component {
             />
           </div>
         </div>
+        <br />
+        <hr />
         <div className='row'>
-          <div className='col md-12 mt-5 mb-5'>
-            <hr />
+          <div className='col md-10 mt-5 mx-auto'>
+            <PostsByUser posts={posts} />
           </div>
         </div>
       </div>
