@@ -86,7 +86,7 @@ class ProfileTabs extends Component {
                         height='30px'
                         width='30px'
                         onError={(i) => (i.target.src = `${DefaultPicture}`)}
-                        src={`${process.env.REACT_APP_APU_URL}/user/photo/${person._id}`}
+                        src={`${process.env.REACT_APP_API_URL}/user/photo/${person._id}`}
                         alt={person.username}
                       />
                       <p

@@ -11,6 +11,8 @@ const {
   getSinglePost,
   like,
   unlike,
+  comment,
+  uncomment,
 } = require('../controllers/postController');
 const {
   createPostValidator,
@@ -25,6 +27,9 @@ router.get('/posts', getAllPosts);
 //like unlike
 router.put('/post/like', requireSignin, like);
 router.put('/post/unlike', requireSignin, unlike);
+//comments
+router.put('/post/comment', requireSignin, comment);
+router.put('/post/uncomment', requireSignin, uncomment);
 
 router.get('/post/:postId', getSinglePost);
 router.post('/post/new/:userId', requireSignin, createPost);

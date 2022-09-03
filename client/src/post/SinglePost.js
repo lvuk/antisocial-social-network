@@ -3,6 +3,7 @@ import { like, singlePost, unlike } from './apiPost';
 import DefaultPicture from '../images/avatar.png';
 import { Link, Redirect } from 'react-router-dom';
 import { isAuthenticated } from '../auth';
+import Comment from './Comment';
 
 class SinglePost extends Component {
   state = {
@@ -10,6 +11,8 @@ class SinglePost extends Component {
     like: false,
     likes: 0,
     redirectToSignin: false,
+    comment: false,
+    comments: [],
   };
 
   componentDidMount = () => {
@@ -22,6 +25,7 @@ class SinglePost extends Component {
           post: data,
           likes: data.likes.length,
           like: this.checkLike(data.likes),
+          comments: data.comments,
         });
       }
     });
@@ -52,12 +56,19 @@ class SinglePost extends Component {
     });
   };
 
+  updateComments = (comments) => {
+    this.setState({ comments: comments });
+  };
+
+  commentToggle = () => {
+    this.setState({ comment: !this.state.comment });
+  };
+
   renderPost = (post) => {
-    console.log(post);
     const posterId = post.creator ? `${post.creator._id}` : '';
     const posterUsername = post.creator ? post.creator.username : 'Unknown';
 
-    const { like, likes, redirectToSignin } = this.state;
+    const { like, likes, redirectToSignin, comment, comments } = this.state;
 
     if (redirectToSignin) {
       return <Redirect to='/signin' />;
@@ -65,8 +76,27 @@ class SinglePost extends Component {
 
     return (
       <div className='row'>
-        <div className='card col-md-9 mx-auto mt-5'>
+        <div className='card col-md-9 col-lg-6 mx-auto mt-5'>
           <div className='card-body'>
+            <div
+              style={{
+                textAlign: 'right',
+                position: 'relative',
+                marginBottom: '-2.8rem',
+              }}
+            >
+              {isAuthenticated().user &&
+                isAuthenticated().user._id === post.creator._id && (
+                  <div>
+                    <Link
+                      to={`/post/edit/${post._id}`}
+                      className='btn btn-raised btn-outline-primary btn-sm '
+                    >
+                      Edit
+                    </Link>
+                  </div>
+                )}
+            </div>
             <img
               style={{
                 borderRadius: '50%',
@@ -113,24 +143,23 @@ class SinglePost extends Component {
             <div className='d-inline-block' onClick={this.likeToggle}>
               {likes}{' '}
               {!like ? (
-                <i class='fa-regular fa-heart'></i>
+                <i className='fa-regular fa-heart'></i>
               ) : (
-                <i class='fa-solid fa-heart'></i>
+                <i className='fa-solid fa-heart'></i>
               )}
             </div>
-            <div className='d-inline-block ms-3'>
-              {isAuthenticated().user &&
-                isAuthenticated().user._id === post.creator._id && (
-                  <div>
-                    <Link
-                      to={`/post/edit/${post._id}`}
-                      className='btn btn-raised btn-primary btn-sm '
-                    >
-                      Edit
-                    </Link>
-                  </div>
-                )}
+            <div className='d-inline-block ms-2' onClick={this.commentToggle}>
+              {comments.length} <i className='fa-regular fa-comment'></i>
             </div>
+            {comment ? (
+              <Comment
+                postId={post._id}
+                comments={comments}
+                updateComments={this.updateComments}
+              />
+            ) : (
+              ''
+            )}
           </div>
         </div>
       </div>

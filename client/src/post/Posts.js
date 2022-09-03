@@ -94,6 +94,7 @@ class Posts extends Component {
 
                 <p className='card-body '>{post.post.substring(0, 200)}</p>
                 <hr />
+
                 <Link
                   to={`/post/${post._id}`}
                   className='btn btn-outline-primary'
