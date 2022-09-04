@@ -1,5 +1,8 @@
+const { now } = require('lodash');
 const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Schema;
+const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+console.log(timezone);
 
 const postSchema = new mongoose.Schema({
   post: {

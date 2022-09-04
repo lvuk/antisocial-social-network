@@ -13,6 +13,7 @@ const {
   unlike,
   comment,
   uncomment,
+  getLastPostByUser,
 } = require('../controllers/postController');
 const {
   createPostValidator,
@@ -34,6 +35,7 @@ router.put('/post/uncomment', requireSignin, uncomment);
 router.get('/post/:postId', getSinglePost);
 router.post('/post/new/:userId', requireSignin, createPost);
 router.get('/posts/by/:userId', getPostsByUser);
+router.get('/post/by/:userId', getLastPostByUser);
 router.delete('/post/:postId', requireSignin, isCreator, deletePost);
 router.put('/post/:postId', requireSignin, isCreator, updatePost);
 //photo

@@ -64,9 +64,9 @@ exports.createPost = (req, res, next) => {
     }
     if (!post.post) {
       return res.status(400).json({ error: "Post can't be empty" });
-    } else if (post.post.length < 4 || post.post.length > 365) {
+    } else if (post.post.length > 365) {
       return res.status(400).json({
-        error: 'Post must be between 4 and 365 characters long',
+        error: 'Post must be less than 365 characters long',
       });
     }
     post.save((err, result) => {
@@ -124,6 +124,18 @@ exports.getPostsByUser = (req, res) => {
     .populate('creator', '_id username')
     .select('_id post created photo likes')
     .sort({ created: -1 })
+    .exec((err, posts) => {
+      if (err) return res.status(400).json({ error: err });
+      res.json(posts);
+    });
+};
+
+exports.getLastPostByUser = (req, res) => {
+  Post.find({ creator: req.profile._id })
+    .populate('creator', '_id username')
+    .select('_id post created photo likes')
+    .sort({ created: -1 })
+    .limit(1)
     .exec((err, posts) => {
       if (err) return res.status(400).json({ error: err });
       res.json(posts);

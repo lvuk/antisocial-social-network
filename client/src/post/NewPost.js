@@ -1,30 +1,86 @@
 import React, { Component } from 'react';
-
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import { isAuthenticated } from '../auth';
-import { create } from './apiPost';
+import { create, lastPostByUser } from './apiPost';
 
 class NewPost extends Component {
   constructor() {
     super();
     this.state = {
       post: '',
-      photo: '',
+      photos: '',
       error: '',
       user: {},
       fileSize: 0,
       loading: false,
       isPosted: false,
+      lastPost: {},
+      isEligibleToPost: true,
     };
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.postData = new FormData();
     this.setState({ user: isAuthenticated().user });
+    const userId = isAuthenticated().user._id;
+    const token = isAuthenticated().token;
+    await lastPostByUser(userId, token).then((data) => {
+      if (data.error) {
+        console.log(data.error);
+      } else {
+        // console.log(data);
+        this.setState({ lastPost: data[0] });
+        // console.log(this.state.lastPost);
+      }
+    });
+    this.checkPostsToday();
   }
 
-  isValid = () => {
-    const { post, fileSize } = this.state;
+  checkPostsToday = () => {
+    dayjs.extend(utc);
+    dayjs.extend(timezone);
+    const postCreated = new Date(this.state.lastPost.created);
+    console.log(this.state.lastPost);
 
+    const userTimezone = dayjs.tz.guess();
+    // console.log(userTimezone);
+
+    const postCreatedUserTimezone = dayjs(postCreated, userTimezone);
+    // console.log(postCreatedUserTimezone);
+
+    const localStartOfDay = dayjs().local().startOf('day');
+    // console.log(localStartOfDay);
+
+    const localEndOfDay = dayjs().local().endOf('day');
+    // console.log(localEndOfDay);
+
+    if (
+      postCreatedUserTimezone >= localStartOfDay &&
+      postCreatedUserTimezone <= localEndOfDay
+    ) {
+      this.setState({
+        isEligibleToPost: false,
+      });
+    }
+
+    // console.log(this.state.lastPost);
+    // console.log(this.state.lastPost.created);
+    // console.log(createdDate);
+  };
+
+  isValid = () => {
+    const { post, fileSize, isEligibleToPost } = this.state;
+    console.log(this.state.isEligibleToPost);
+
+    if (!isEligibleToPost) {
+      this.setState({
+        error: 'You can post only once a day',
+        loading: false,
+      });
+      return false;
+    }
     if (fileSize >= 300000) {
       this.setState({
         error: 'File size should be less than 300KB',
@@ -33,6 +89,10 @@ class NewPost extends Component {
       return false;
     }
     if (post.length === 0) {
+      this.setState({
+        error: 'Post cant be empty',
+        loading: false,
+      });
       return false;
     }
     return true;
@@ -156,7 +216,6 @@ class NewPost extends Component {
 
   render() {
     const { post, error, loading, isPosted } = this.state;
-    console.log(error);
 
     return (
       <div className='container'>
