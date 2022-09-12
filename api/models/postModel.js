@@ -9,10 +9,11 @@ const postSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  photo: {
-    data: Buffer,
-    contentType: String,
-  },
+  photoUrls: [
+    {
+      type: String,
+    },
+  ],
   creator: {
     type: ObjectId,
     ref: 'User',

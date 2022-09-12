@@ -74,7 +74,7 @@ class Signup extends Component {
         </div>
         <button
           onClick={this.clickSignup}
-          className='btn btn-raised btn-outline-warning btn-rounded mt-3'
+          className='btn btn-raised btn-outline-primary mt-3'
         >
           Sign up
         </button>
@@ -85,7 +85,7 @@ class Signup extends Component {
   render() {
     const { username, email, password, error, open } = this.state;
     return (
-      <div className='container'>
+      <div className='container w-75'>
         <h2 className='mt-5 mb-5'>Signup</h2>
 
         <div

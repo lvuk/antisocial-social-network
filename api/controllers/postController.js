@@ -2,6 +2,7 @@ const Post = require('../models/postModel');
 const formidable = require('formidable');
 const fs = require('fs');
 const _ = require('lodash');
+const cloudinary = require('../utils/cloudinary');
 
 exports.postById = (req, res, next, id) => {
   Post.findById(id)
@@ -39,7 +40,7 @@ exports.getAllPosts = (req, res) => {
     .populate('creator', '_id username')
     // .populate('comments', 'text created')
     // .populate('comments.postedBy', '_id username')
-    .select('_id post created photo likes')
+    .select('_id post created photoUrls likes')
     .sort({ created: -1 })
     .then((posts) => {
       res.json(posts);
@@ -47,34 +48,38 @@ exports.getAllPosts = (req, res) => {
     .catch((err) => console.log(err));
 };
 
-exports.createPost = (req, res, next) => {
-  let form = new formidable.IncomingForm();
-  form.keepExtensions = true;
-  form.parse(req, (err, fields, files) => {
-    if (err)
-      return res.status(400).json({ error: 'Image could not be uploaded' });
+exports.createPost = async (req, res, next) => {
+  const text = req.body.post;
+  const photos = req.body.photos;
 
-    let post = new Post(fields);
-    req.profile.hashed_password = undefined;
-    req.profile.salt = undefined;
-    post.creator = req.profile;
-    if (files.photo) {
-      post.photo.data = fs.readFileSync(files.photo.filepath);
-      post.photo.contentType = files.photo.type;
+  let post = new Post();
+  post.post = text;
+  req.profile.hashed_password = undefined;
+  req.profile.salt = undefined;
+  post.creator = req.profile;
+
+  if (photos !== []) {
+    for (let index = 0; index < photos.length; index++) {
+      const cloudinaryPhoto = await cloudinary.uploader.unsigned_upload(
+        photos[index],
+        'qgqufopx'
+      );
+      post.photoUrls.push(cloudinaryPhoto.url);
     }
-    if (!post.post) {
-      return res.status(400).json({ error: "Post can't be empty" });
-    } else if (post.post.length > 365) {
-      return res.status(400).json({
-        error: 'Post must be less than 365 characters long',
-      });
-    }
-    post.save((err, result) => {
-      if (err) return res.status(400).json({ error: err });
-      console.log(result);
-      res.json(result);
+  }
+  if (!post.post) {
+    return res.status(400).json({ error: "Post can't be empty" });
+  } else if (post.post.length > 365) {
+    return res.status(400).json({
+      error: 'Post must be less than 365 characters long',
     });
+  }
+  post.save((err, result) => {
+    if (err) return res.status(400).json({ error: err });
+    console.log(result);
+    res.json(result);
   });
+  // });
 };
 
 exports.deletePost = (req, res) => {
@@ -95,34 +100,41 @@ exports.deletePost = (req, res) => {
 //   });
 // };
 
-exports.updatePost = (req, res, next) => {
-  let form = new formidable.IncomingForm();
-  form.keepExtensions = true;
-  form.parse(req, (err, fields, files) => {
-    if (err)
-      return res.status(400).json({ error: 'Photo could not be uploaded' });
+exports.updatePost = async (req, res, next) => {
+  let newPhotos = [];
+  let post = req.post;
+  console.log(post);
 
-    let post = req.post;
-    post = _.extend(post, fields);
-    post.updated = Date.now();
-
-    if (files.photo) {
-      post.photo.data = fs.readFileSync(files.photo.filepath);
-      post.photo.contentType = files.photo.type;
+  if (req.body.photos) {
+    for (let index = 0; index < req.body.photos.length; index++) {
+      const cloudinaryPhoto = await cloudinary.uploader.unsigned_upload(
+        req.body.photos[index],
+        'qgqufopx'
+      );
+      newPhotos.push(cloudinaryPhoto.url);
     }
-    post.save((err, result) => {
-      if (err) {
-        return res.status(400).json({ error: err });
-      }
-      res.json(post);
+    post = _.extend(post, { photoUrls: newPhotos });
+  }
+  post = _.extend(post, { post: req.body.post });
+  if (!post.post) {
+    return res.status(400).json({ error: "Post can't be empty" });
+  } else if (post.post.length > 365) {
+    return res.status(400).json({
+      error: 'Post must be less than 365 characters long',
     });
+  }
+  console.log(post);
+  post.save((err, result) => {
+    if (err) return res.status(400).json({ error: err });
+    console.log(result);
+    res.json(result);
   });
 };
 
 exports.getPostsByUser = (req, res) => {
   Post.find({ creator: req.profile._id })
     .populate('creator', '_id username')
-    .select('_id post created photo likes')
+    .select('_id post created photoUrls likes')
     .sort({ created: -1 })
     .exec((err, posts) => {
       if (err) return res.status(400).json({ error: err });
@@ -133,7 +145,7 @@ exports.getPostsByUser = (req, res) => {
 exports.getLastPostByUser = (req, res) => {
   Post.find({ creator: req.profile._id })
     .populate('creator', '_id username')
-    .select('_id post created photo likes')
+    .select('_id post created photoUrls likes')
     .sort({ created: -1 })
     .limit(1)
     .exec((err, posts) => {
@@ -142,12 +154,12 @@ exports.getLastPostByUser = (req, res) => {
     });
 };
 
-exports.postPhoto = (req, res, next) => {
-  res.set('Content-Type', req.post.photo.contentType);
-  return res.send(req.post.photo.data);
+exports.postPhotos = (req, res, next) => {
+  return res.send(req.post.photoUrls);
 };
 
 exports.getSinglePost = (req, res) => {
+  console.log(req.post);
   return res.json(req.post);
 };
 
@@ -219,4 +231,14 @@ exports.uncomment = (req, res) => {
         res.json(result);
       }
     });
+};
+
+exports.uploadImage = (req, res) => {
+  console.log('im here');
+  try {
+    const fileStr = req.body.data;
+    console.log(fileStr);
+  } catch (error) {
+    console.log(error);
+  }
 };

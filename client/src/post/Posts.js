@@ -3,6 +3,7 @@ import { list } from './apiPost';
 import DefaultPicture from '../images/avatar.png';
 import { Link } from 'react-router-dom';
 import { isAuthenticated } from '../auth';
+import CarouselPhoto from './CarouselPhoto';
 
 class Posts extends Component {
   constructor() {
@@ -30,7 +31,7 @@ class Posts extends Component {
           const posterUsername = post.creator ? post.creator.username : '';
 
           return (
-            <div className='card col-md-12 mb-5' key={i}>
+            <div className='card col-md-9 col-lg-8 mx-auto mb-5' key={i}>
               <div className='card-body'>
                 <img
                   style={{
@@ -81,15 +82,7 @@ class Posts extends Component {
                 )}
                 <hr />
                 <div className='text-center'>
-                  {post.photo ? (
-                    <img
-                      src={`${process.env.REACT_APP_API_URL}/post/photo/${post._id}`}
-                      alt='Post'
-                      className='img-fluid mb-3 text-center'
-                    />
-                  ) : (
-                    ''
-                  )}
+                  {post.photoUrls ? <CarouselPhoto post={post} /> : ''}
                 </div>
 
                 <p className='card-body '>{post.post.substring(0, 200)}</p>

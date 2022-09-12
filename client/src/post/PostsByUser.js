@@ -3,6 +3,7 @@ import { postsByUser } from './apiPost';
 import DefaultPicture from '../images/avatar.png';
 import { Link } from 'react-router-dom';
 import { isAuthenticated } from '../auth';
+import CarouselPhoto from './CarouselPhoto';
 
 class PostsByUser extends Component {
   componentDidMount = () => {
@@ -23,9 +24,10 @@ class PostsByUser extends Component {
         {posts.map((post, i) => {
           const posterId = post.creator ? post.creator._id : '';
           const posterUsername = post.creator ? post.creator.username : '';
+          console.log(post);
 
           return (
-            <div className='card col-md-12 mb-5' key={i}>
+            <div className='card col-md-8 mx-auto mb-5' key={i}>
               <div className='card-body'>
                 <div className='d-inline'>
                   <img
@@ -59,17 +61,7 @@ class PostsByUser extends Component {
                 </div>
                 <hr />
                 <div className='text-center'>
-                  {post.photo ? (
-                    <img
-                      src={`${process.env.REACT_APP_API_URL}/post/photo/${
-                        post._id
-                      }?${new Date().getTime()}`}
-                      alt='Post'
-                      className='img-fluid mb-3 text-center'
-                    />
-                  ) : (
-                    ''
-                  )}
+                  {post.photoUrls ? <CarouselPhoto post={post} /> : ''}
                 </div>
 
                 <p className='card-body '>{post.post.substring(0, 200)}</p>

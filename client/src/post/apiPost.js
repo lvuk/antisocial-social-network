@@ -5,8 +5,9 @@ export const create = (userId, token, post) => {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
     },
-    body: post,
+    body: JSON.stringify(post),
   })
     .then((response) => {
       return response.json();
@@ -92,8 +93,9 @@ export const update = (postId, token, post) => {
     headers: {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
     },
-    body: post,
+    body: JSON.stringify(post),
   })
     .then((response) => {
       return response.json();

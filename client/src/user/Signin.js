@@ -65,7 +65,7 @@ class Signin extends Component {
         </div>
         <button
           onClick={this.clickSignin}
-          className='btn btn-raised btn-warning btn-rounded mt-3'
+          className='btn btn-raised btn-primary  mt-3'
         >
           Sign in
         </button>
@@ -79,7 +79,7 @@ class Signin extends Component {
       return <Redirect to='/' />;
     }
     return (
-      <div className='container'>
+      <div className='container w-75'>
         <h2 className='mt-5 mb-5'>Signin</h2>
 
         <div

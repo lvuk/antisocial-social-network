@@ -95,6 +95,7 @@ class EditProfile extends Component {
           updateUser(data, () => {
             this.setState({
               redirectToProfile: true,
+              loading: false,
             });
           });
       });
@@ -154,7 +155,7 @@ class EditProfile extends Component {
         <div className='d-inline-block'>
           <button
             onClick={this.clickUpdate}
-            className='btn btn-raised btn-outline-success btn-rounded mt-3 me-5'
+            className='btn btn-raised btn-outline-success mt-3 me-5'
           >
             Update
           </button>
@@ -185,7 +186,7 @@ class EditProfile extends Component {
       : DefaultPicture;
 
     return (
-      <div className='container'>
+      <div className='container w-75'>
         {loading ? (
           <div className='jumbotron text-center'>
             <h2>Loading...</h2>
@@ -193,7 +194,7 @@ class EditProfile extends Component {
         ) : (
           ''
         )}
-        <h2 className='mt-5 mb-5'>EDIT PROFILE</h2>
+        <h2 className='mt-5 mb-2'>EDIT PROFILE</h2>
 
         <img
           src={photoUrl}

@@ -55,7 +55,7 @@ class ProfileTabs extends Component {
                 ))}
               </ul>
             </div>
-            <p className='lead text-body text-center ms-4'>
+            <p className='lead text-body text-center me-5'>
               {followers.length}
             </p>
           </div>
@@ -100,7 +100,7 @@ class ProfileTabs extends Component {
                 ))}
               </ul>
             </div>
-            <p className='lead text-body text-center ms-5'>
+            <p className='lead text-body text-center me-4'>
               {following.length}
             </p>
           </div>

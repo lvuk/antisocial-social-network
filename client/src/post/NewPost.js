@@ -4,13 +4,16 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import { isAuthenticated } from '../auth';
 import { create, lastPostByUser } from './apiPost';
+// import cloudinary from '../utils/cloudinary';
+// import cloudinary from 'cloudinary';
 
 class NewPost extends Component {
   constructor() {
     super();
     this.state = {
       post: '',
-      photos: '',
+      files: [],
+      photos: [],
       error: '',
       user: {},
       fileSize: 0,
@@ -42,19 +45,14 @@ class NewPost extends Component {
     dayjs.extend(utc);
     dayjs.extend(timezone);
     const postCreated = new Date(this.state.lastPost.created);
-    console.log(this.state.lastPost);
 
     const userTimezone = dayjs.tz.guess();
-    // console.log(userTimezone);
 
     const postCreatedUserTimezone = dayjs(postCreated, userTimezone);
-    // console.log(postCreatedUserTimezone);
 
     const localStartOfDay = dayjs().local().startOf('day');
-    // console.log(localStartOfDay);
 
     const localEndOfDay = dayjs().local().endOf('day');
-    // console.log(localEndOfDay);
 
     if (
       postCreatedUserTimezone >= localStartOfDay &&
@@ -64,26 +62,18 @@ class NewPost extends Component {
         isEligibleToPost: false,
       });
     }
-
-    // console.log(this.state.lastPost);
-    // console.log(this.state.lastPost.created);
-    // console.log(createdDate);
   };
 
   isValid = () => {
-    const { post, fileSize, isEligibleToPost } = this.state;
-    console.log(this.state.isEligibleToPost);
+    const { post, isEligibleToPost, files } = this.state;
 
+    if (files.length > 3) {
+      this.setState({ error: 'Only 3 photos are allowed', loading: false });
+      return false;
+    }
     if (!isEligibleToPost) {
       this.setState({
         error: 'You can post only once a day',
-        loading: false,
-      });
-      return false;
-    }
-    if (fileSize >= 300000) {
-      this.setState({
-        error: 'File size should be less than 300KB',
         loading: false,
       });
       return false;
@@ -95,45 +85,79 @@ class NewPost extends Component {
       });
       return false;
     }
+    if (post.length > 365) {
+      this.setState({
+        error: 'Post can contain maximum of 365 characters',
+        loading: false,
+      });
+      return false;
+    }
     return true;
   };
 
   handleChange = (state) => (event) => {
     this.setState({ error: '' });
-    const value =
-      state === 'photo' ? event.target.files[0] : event.target.value;
+    // console.log(event.target.files);
 
-    const fileSize = state === 'photo' ? event.target.files[0].size : 0;
-    this.postData.set(state, value);
-    this.setState({ [state]: value, fileSize });
+    if (state === 'photos') {
+      const files = event.target.files;
+      console.log(files);
+      for (let index = 0; index < files.length; index++) {
+        this.state.files.push(files[index]);
+        this.setImageToState(files[index]);
+      }
+    } else {
+      const value = event.target.value;
+      this.setState({ [state]: value });
+    }
+    console.log(this.state);
   };
 
-  clickCreate = (event) => {
+  setImageToState = (image) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(image);
+    reader.onloadend = () => {
+      this.state.photos.push(reader.result);
+    };
+    console.log(this.state);
+  };
+
+  clickCreate = async (event) => {
+    // console.log(this.state);
     event.preventDefault();
     this.setState({ loading: true });
+
+    // console.log(event.target.photos.value);
 
     if (this.isValid()) {
       const userId = isAuthenticated().user._id;
       const token = isAuthenticated().token;
-      //send to backend
-      create(userId, token, this.postData).then((data) => {
-        if (data.error)
-          this.setState({ error: data.error, loading: false, post: '' });
-        else {
-          this.setState({
-            loading: false,
-            post: '',
-            photo: '',
-            isPosted: true,
-          });
-        }
-      });
+      //send photo to cloudinary and save urls in state
+      console.log(this.state.files);
+
+      console.log(this.state);
+      const postData = { post: this.state.post, photos: this.state.photos };
+
+      const data = await create(userId, token, postData);
+      if (data.error)
+        this.setState({ error: data.error, loading: false, post: '' });
+      else {
+        this.setState({
+          loading: false,
+          files: [],
+          post: '',
+          photos: [],
+          isPosted: true,
+        });
+      }
+
+      // console.log(this.state);
     }
   };
 
   createForm = (post) => {
     return (
-      <form action='' method='post'>
+      <form onSubmit={this.clickCreate}>
         <div className='form-group'>
           <textarea
             onChange={this.handleChange('post')}
@@ -146,14 +170,32 @@ class NewPost extends Component {
 
         <div className='form-group'>
           <input
-            onChange={this.handleChange('photo')}
+            onChange={this.handleChange('photos')}
             type='file'
             className='form-control'
             accept='image/*'
+            name='photos'
+            multiple
           />
         </div>
 
-        <div className='d-inline-block'></div>
+        <div className='d-inline-block mt-3'>
+          <button
+            type='submit'
+            className='btn btn-raised btn-primary'
+            data-mdb-dismiss='modal'
+            aria-label='Close'
+          >
+            Post
+          </button>
+          <button
+            type='button'
+            className='btn btn-outline-danger ms-3'
+            data-mdb-dismiss='modal'
+          >
+            Close
+          </button>
+        </div>
       </form>
     );
   };
@@ -190,23 +232,7 @@ class NewPost extends Component {
                 ></button>
               </div>
               <div className='modal-body'>{this.createForm(post)}</div>
-              <div className='modal-footer'>
-                <button
-                  type='button'
-                  className='btn btn-outline-danger'
-                  data-mdb-dismiss='modal'
-                >
-                  Close
-                </button>
-                <button
-                  onClick={this.clickCreate}
-                  className='btn btn-raised btn-primary'
-                  data-mdb-dismiss='modal'
-                  aria-label='Close'
-                >
-                  Post
-                </button>
-              </div>
+              <div className='modal-footer'></div>
             </div>
           </div>
         </div>

@@ -7,13 +7,14 @@ const {
   isCreator,
   deletePost,
   updatePost,
-  postPhoto,
+  postPhotos,
   getSinglePost,
   like,
   unlike,
   comment,
   uncomment,
   getLastPostByUser,
+  uploadImage,
 } = require('../controllers/postController');
 const {
   createPostValidator,
@@ -38,8 +39,10 @@ router.get('/posts/by/:userId', getPostsByUser);
 router.get('/post/by/:userId', getLastPostByUser);
 router.delete('/post/:postId', requireSignin, isCreator, deletePost);
 router.put('/post/:postId', requireSignin, isCreator, updatePost);
+//cloudinary
+router.post('/cloudinary/upload', uploadImage);
 //photo
-router.get('/post/photo/:postId', postPhoto);
+router.get('/post/photos/:postId', postPhotos);
 
 //any route containg :userId, our app will first exec userByID()
 router.param('userId', userById);

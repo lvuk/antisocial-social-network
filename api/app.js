@@ -12,6 +12,7 @@ const app = express();
 const postRoutes = require('./routes/postRouter');
 const authRoutes = require('./routes/authRouter');
 const userRoutes = require('./routes/userRouter');
+
 //api-docs
 app.get('/', (req, res) => {
   fs.readFile('api-docs.json', (err, data) => {
@@ -39,6 +40,8 @@ mongoose.connect(
 );
 
 //middlewears
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(cookieParser());

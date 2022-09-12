@@ -4,6 +4,7 @@ import DefaultPicture from '../images/avatar.png';
 import { Link, Redirect } from 'react-router-dom';
 import { isAuthenticated } from '../auth';
 import Comment from './Comment';
+import CarouselPhoto from './CarouselPhoto';
 
 class SinglePost extends Component {
   state = {
@@ -76,7 +77,7 @@ class SinglePost extends Component {
 
     return (
       <div className='row'>
-        <div className='card col-md-9 col-lg-6 mx-auto mt-5'>
+        <div className='card col-md-7 col-lg-6 mx-auto my-5'>
           <div className='card-body'>
             <div
               style={{
@@ -87,7 +88,7 @@ class SinglePost extends Component {
             >
               {isAuthenticated().user &&
                 isAuthenticated().user._id === post.creator._id && (
-                  <div>
+                  <div style={{ marginBottom: '-5rem' }}>
                     <Link
                       to={`/post/edit/${post._id}`}
                       className='btn btn-raised btn-outline-primary btn-sm '
@@ -97,45 +98,39 @@ class SinglePost extends Component {
                   </div>
                 )}
             </div>
-            <img
-              style={{
-                borderRadius: '50%',
-                border: '1px solid black',
-              }}
-              className='float-left me-2'
-              height='40px'
-              width='40px'
-              onError={(i) => (i.target.src = `${DefaultPicture}`)}
-              src={`${process.env.REACT_APP_API_URL}/user/photo/${posterId}`}
-              alt={posterUsername}
-            />
-            <Link
-              to={`/user/${posterId}`}
-              className='lead text-body'
-              style={{ display: 'inline', fontSize: '1.2rem' }}
-            >
-              {posterUsername}{' '}
-              <p
+            <div className='mt-5'>
+              <img
                 style={{
-                  fontSize: '0.8rem',
-                  marginLeft: '50px',
-                  marginTop: '-10px',
+                  borderRadius: '50%',
+                  border: '1px solid black',
                 }}
+                className='float-left me-2'
+                height='40px'
+                width='40px'
+                onError={(i) => (i.target.src = `${DefaultPicture}`)}
+                src={`${process.env.REACT_APP_API_URL}/user/photo/${posterId}`}
+                alt={posterUsername}
+              />
+              <Link
+                to={`/user/${posterId}`}
+                className='lead text-body'
+                style={{ display: 'inline', fontSize: '1.2rem' }}
               >
-                {new Date(post.created).toDateString()}
-              </p>
-            </Link>
+                {posterUsername}{' '}
+                <p
+                  style={{
+                    fontSize: '0.8rem',
+                    marginLeft: '50px',
+                    marginTop: '-10px',
+                  }}
+                >
+                  {new Date(post.created).toDateString()}
+                </p>
+              </Link>
+            </div>
             <hr />
             <div className='text-center'>
-              {post.photo ? (
-                <img
-                  src={`${process.env.REACT_APP_API_URL}/post/photo/${post._id}`}
-                  alt='Post'
-                  className='img-fluid mb-3 text-center'
-                />
-              ) : (
-                ''
-              )}
+              {post.photoUrls ? <CarouselPhoto post={post} /> : ''}
             </div>
 
             <p className='card-body '>{post.post}</p>

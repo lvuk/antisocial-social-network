@@ -6,12 +6,15 @@ import { update } from './apiPost';
 import DeletePost from './DeletePost';
 import DefaultPicture from '../images/avatar.png';
 import { Link } from 'react-router-dom';
+import CarouselPhoto from './CarouselPhoto';
 
 class EditPost extends Component {
   constructor() {
     super();
     this.state = {
       id: '',
+      files: [],
+      photos: [],
       post: '',
       redirectToProfile: false,
       error: '',
@@ -19,6 +22,7 @@ class EditPost extends Component {
       loading: false,
       img: false,
       created: '',
+      postForImages: {},
     };
   }
 
@@ -30,16 +34,18 @@ class EditPost extends Component {
         this.setState({
           id: data._id,
           post: data.post,
+          photo: data.photosUrls,
           error: '',
           created: data.created,
+          postForImages: data,
         });
       }
     });
   };
 
-  checkPhoto = (postId) => {
+  checkPhotos = (postId) => {
     singlePost(postId).then((data) => {
-      if (data.photo) {
+      if (data.photosUrl) {
         this.setState({ img: true });
       }
     });
@@ -49,39 +55,71 @@ class EditPost extends Component {
     this.postData = new FormData();
     const postId = this.props.match.params.postId;
     this.init(postId);
-    this.checkPhoto(postId);
+    this.checkPhotos(postId);
   }
+
+  setImageToState = (image) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(image);
+    reader.onloadend = () => {
+      this.state.photos.push(reader.result);
+    };
+    console.log(this.state);
+  };
 
   handleChange = (state) => (event) => {
     this.setState({ error: '' });
-    const value =
-      state === 'photo' ? event.target.files[0] : event.target.value;
-
-    const fileSize = state === 'photo' ? event.target.files[0].size : 0;
-    this.postData.set(state, value);
-    this.setState({ [state]: value, fileSize });
+    // console.log(event.target.files);
+    console.log(event.target.files);
+    if (event.target.files !== []) {
+      this.setState({ photos: this.state.postForImages.photoUrls });
+    }
+    if (state === 'photos') {
+      const files = event.target.files;
+      console.log(files);
+      for (let index = 0; index < files.length; index++) {
+        this.state.files.push(files[index]);
+        this.setImageToState(files[index]);
+      }
+    } else {
+      const value = event.target.value;
+      this.setState({ [state]: value });
+    }
+    console.log(this.state);
   };
 
-  clickUpdate = (event) => {
+  clickUpdate = async (event) => {
+    // console.log(this.state);
     event.preventDefault();
     this.setState({ loading: true });
 
+    // console.log(event.target.photos.value);
+
     if (this.isValid()) {
-      const postId = this.state.id;
+      const postId = this.props.match.params.postId;
       const token = isAuthenticated().token;
-      //send to backend
-      update(postId, token, this.postData).then((data) => {
-        if (data.error)
-          this.setState({ error: data.error, loading: false, post: '' });
-        else {
-          this.setState({
-            loading: false,
-            post: '',
-            photo: '',
-            redirectToProfile: true,
-          });
-        }
-      });
+      //send photo to cloudinary and save urls in state
+      console.log(this.state.files);
+
+      console.log(this.state);
+      const postData = { post: this.state.post, photos: this.state.photos };
+
+      const data = await update(postId, token, postData);
+      if (data.error)
+        this.setState({ error: data.error, loading: false, post: '' });
+      else {
+        this.setState({
+          redirectToProfile: true,
+          loading: false,
+          files: [],
+          post: '',
+          photos: [],
+          isPosted: true,
+          postForImages: [],
+        });
+      }
+
+      // console.log(this.state);
     }
   };
 
@@ -105,7 +143,7 @@ class EditPost extends Component {
   updateForm = (post) => {
     return (
       <div className='row'>
-        <div className='col-lg-4 col-md-10 mt-5 mx-auto'>
+        <div className='col-lg-6 col-md-10 mt-5 mx-auto'>
           <form>
             <div className='form-group'>
               <textarea
@@ -122,10 +160,11 @@ class EditPost extends Component {
 
             <div className='form-group'>
               <input
-                onChange={this.handleChange('photo')}
+                onChange={this.handleChange('photos')}
                 type='file'
                 className='form-control'
                 accept='image/*'
+                multiple
               />
             </div>
 
@@ -148,9 +187,11 @@ class EditPost extends Component {
   };
 
   render() {
-    const { post, redirectToProfile, id, img, error } = this.state;
+    const { post, redirectToProfile, error, postForImages, loading } =
+      this.state;
     const posterId = isAuthenticated().user._id;
     const posterUsername = isAuthenticated().user.username;
+    console.log(postForImages);
 
     if (redirectToProfile) {
       return <Redirect to={`/user/${isAuthenticated().user._id}`} />;
@@ -159,8 +200,15 @@ class EditPost extends Component {
     return (
       <div>
         <div className='row'>
-          <div className='card col-sm-9 mx-auto mt-5'>
+          <div className='card col-sm-10 mx-auto mt-5'>
             <div className='card-body'>
+              {loading ? (
+                <div className='jumbotron text-center'>
+                  <h2>Loading...</h2>
+                </div>
+              ) : (
+                ''
+              )}
               <div
                 className='alert alert-danger mt-3'
                 style={{ display: error ? '' : 'none' }}
@@ -198,16 +246,9 @@ class EditPost extends Component {
                 </Link>
               </div>
               <hr />
-              {img ? (
+              {postForImages.photoUrls ? (
                 <div className='text-center'>
-                  <img
-                    src={`${
-                      process.env.REACT_APP_API_URL
-                    }/post/photo/${id}?${new Date().getTime()}`}
-                    alt='post'
-                    className='img-fluid mt-4 text-center '
-                    style={{ display: 'inline-block' }}
-                  />
+                  <CarouselPhoto post={postForImages} />
                 </div>
               ) : (
                 ''
